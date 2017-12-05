@@ -8,6 +8,11 @@ call plug#begin('~/.vim/plugged')
 Plug 'jonathanfilip/vim-lucius'
 Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 Plug 'ctrlpvim/ctrlp.vim', { 'on': ['CtrlP', 'CtrlPBufTagAll', 'CtrlPBuffer', 'CtrlPTag']}
+Plug 'ervandew/supertab'
+Plug 'tpope/vim-surround'
+Plug 'moll/vim-bbye'
+Plug 'vim-scripts/ZoomWin'
+Plug 'Townk/vim-autoclose'
 
 Plug 'sjbach/lusty'
 Plug 'mbbill/undotree'
@@ -16,13 +21,11 @@ Plug 'roman/golden-ratio'
 Plug 'roxma/nvim-yarp'
 Plug 'roxma/vim-hug-neovim-rpc'
 Plug 'Shougo/deoplete.nvim'
-
 Plug 'w0rp/ale'
 
 Plug 'airblade/vim-gitgutter'
 Plug 'vim-scripts/ag.vim'
 Plug 'pangloss/vim-javascript'
-Plug 'posva/vim-vue.git'
 Plug 'posva/vim-vue'
 Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoInstallBinaries' }
@@ -40,18 +43,6 @@ highlight Normal ctermbg=NONE
 
 " =========== END Color theme settings =========
 let g:deoplete#enable_at_startup = 1
-
-" ========== Functions ==================
-func! ClearTrailingWS()
-  normal! mz
-  %s/\s\+$//ge
-  normal! `z
-endfunc
-
-func! ShowTrailingWS()
-  match Error /\s\+$/
-endfunc
-" ========== END Functions ==============
 
 " ========== Vim Basic Settings ============="
 " Make vim simpler (also plugins use those)
@@ -71,9 +62,9 @@ set norelativenumber
 
 " Global TAB settings.
 set smartindent
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
 set expandtab
 
 " Show whitespaces
@@ -84,6 +75,7 @@ set listchars=tab:▸\ ,eol:¬,trail:·,precedes:«,extends:»
 set hlsearch
 
 " Use smartcase
+set ignorecase
 set smartcase
 
 " Search while typing
@@ -155,6 +147,26 @@ augroup ResizeGroup
 augroup END
 
 " =========== END Basic Vim Settings ===========
+"
+
+" ========== Functions ==================
+"
+augroup OmniCompletionClose
+  autocmd!
+  autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+  autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+augroup END
+
+func! ClearTrailingWS()
+  normal! mz
+  %s/\s\+$//ge
+  normal! `z
+endfunc
+
+func! ShowTrailingWS()
+  match Error /\s\+$/
+endfunc
+" ========== END Functions ==============
 
 " =========== Vim Keybindings ==================
 
@@ -318,6 +330,13 @@ nnoremap g; g;zz
 
 " Removing scrollbars
 if has("gui_running")
+    if has('win32')
+        set guifont=Consolas:h12   " Win32.
+    elseif has('gui_macvim')
+        set guifont=Monaco:h12     " OSX.
+    else
+        set guifont=Liberation\ Mono\ 12 " linux
+    endif
     set cursorline
     set guitablabel=%-0.12t%M
     set guioptions-=T
@@ -335,6 +354,7 @@ endif
 autocmd bufwritepost .vimrc source ~/.vimrc
 
 " ========== END Gvim Settings ==========
+"
 
 " ========== Plugins Settings =========="
 " vim mode-switch lag fix (related to autoclose)
@@ -411,8 +431,6 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_set_loclist = 1
 let g:ale_set_quickfix = 0
 
-inoremap <silent><expr> <Tab>
-    \ pumvisible() ? "\<C-n>" : deoplete#manual_complete()
-
 "========== END Plugin Settings =========="
 autocmd BufNewFile,BufReadPost *.md set filetype=markdown
+autocmd FileType vue syntax sync fromstart
