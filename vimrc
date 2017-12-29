@@ -20,7 +20,6 @@ Plug 'roman/golden-ratio'
 
 Plug 'roxma/nvim-yarp'
 Plug 'roxma/vim-hug-neovim-rpc'
-Plug 'Shougo/deoplete.nvim'
 Plug 'w0rp/ale'
 
 Plug 'airblade/vim-gitgutter'
@@ -40,9 +39,6 @@ colorscheme lucius
 LuciusDark
 highlight Comment ctermfg=249 guifg=#b2b2b2
 highlight Normal ctermbg=NONE
-
-" =========== END Color theme settings =========
-let g:deoplete#enable_at_startup = 1
 
 " ========== Vim Basic Settings ============="
 " Make vim simpler (also plugins use those)
@@ -364,7 +360,7 @@ if ! has("gui_running")
     augroup FastEscape
         au!
         au InsertEnter * set timeoutlen=0
-        au InsertLeave * set timeoutlen=1000
+        au InsertLeave * set timeoutlen=100
     augroup END
 endif
 
