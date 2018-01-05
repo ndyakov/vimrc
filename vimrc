@@ -356,7 +356,7 @@ autocmd bufwritepost .vimrc source ~/.vimrc
 " vim mode-switch lag fix (related to autoclose)
 
 if ! has("gui_running")
-    set ttimeoutlen=10
+    set ttimeoutlen=100
     augroup FastEscape
         au!
         au InsertEnter * set timeoutlen=0
