@@ -10,14 +10,17 @@ call plug#begin('~/.vim/plugged')
 Plug 'jonathanfilip/vim-lucius'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'wincent/terminus'
+Plug 'google/vim-searchindex'
+Plug 'szw/vim-g'
 
 Plug 'tpope/vim-surround'
 Plug 'chaoren/vim-wordmotion'
 Plug 'moll/vim-bbye'
-Plug 'Townk/vim-autoclose'
+"Plug 'Townk/vim-autoclose'
+Plug 'Raimondi/delimitMate'
 Plug 'chrisbra/NrrwRgn'
 
-Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'scrooloose/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ryanoasis/vim-devicons'
 
@@ -29,9 +32,22 @@ Plug '/usr/local/opt/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'pbogut/fzf-mru.vim'
 
+Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
 
 Plug 'w0rp/ale'
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+
+Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+Plug 'padawan-php/deoplete-padawan', { 'do': 'composer install' }
+
 
 Plug 'tpope/vim-markdown'
 Plug 'ekalinin/Dockerfile.vim'
@@ -60,6 +76,7 @@ colorscheme lucius
 LuciusDark
 highlight Comment ctermfg=249 guifg=#b2b2b2
 highlight Error ctermfg=200 guifg=#ff0000
+set termguicolors
 "highlight Normal ctermbg=NONE
 
 "}}}
@@ -67,8 +84,8 @@ highlight Error ctermfg=200 guifg=#ff0000
 " ========== Vim Basic Settings
 "
 syntax on
-
-" Set backup dir for swp files
+set updatetime=1000
+" Set backup dir for swp files 
 set backupdir=~/.vim/backup
 set directory=~/.vim/backup
 
@@ -79,6 +96,7 @@ set cursorline
 set novisualbell
 set notitle
 
+set virtualedit=block
 " autoread if file is changed
 set autoread
 " don't show the mode
@@ -111,60 +129,7 @@ set expandtab
 set backspace=indent,eol,start
 set noshelltemp
 
-" Show whitespaces{{{
-set list
-set listchars=tab:▸\ ,eol:¬,trail:·,precedes:«,extends:»"}}}
-
-" Search{{{
-" Highlight searches
-set hlsearch
-
-" Use smartcase
-set ignorecase
-set smartcase
-
-" Search while typing
-set incsearch
-
-let hlstate=0
-nnoremap <Leader>n :if (hlstate%2 == 0) \| nohlsearch \| else \| set hlsearch \| endif \| let hlstate=hlstate+1<CR>:echo "toggled visibility for hlsearch"<CR>
-inoremap <Leader>n <ESC>:if (hlstate%2 == 0) \|  nohlsearch \| else \| set hlsearch \| endif \| let hlstate=hlstate+1<CR>:echo "toggled visibility for hlsearch"<CR>a}}}
-
-" Reset timeoutline to normal soon afterwards{{{
-set timeoutlen=420 ttimeoutlen=10
-autocmd CursorMoved * set timeoutlen=420 ttimeoutlen=10
-if ! has("gui_running")
-    augroup FastEscape
-        au!
-        au InsertEnter * set timeoutlen=0 ttimeoutlen=0
-        au InsertLeave * set timeoutlen=420 ttimeoutlen=10
-    augroup END
-endif"}}}
-
-" ========== Bad keys {{{1
-
-" Get Rid of stupid Goddamned help keys
-inoremap <F1> <ESC>
-nnoremap <F1> <ESC>
-vnoremap <F1> <ESC>
-
-" Make arrows useless
-inoremap <Left> <Nop>
-inoremap <Right> <Nop>
-inoremap <Up> <Nop>
-inoremap <Down> <Nop>
-nnoremap <Left> <Nop>
-nnoremap <Right> <Nop>
-nnoremap <Up> <Nop>
-nnoremap <Down> <Nop>
-vnoremap <Left> <Nop>
-vnoremap <Right> <Nop>
-vnoremap <Up> <Nop>
-vnoremap <Down> <Nop>
-
-" }}}
-
-" ========== Statusline {{{1
+" Statusline {{{
 if has("statusline")
   set statusline=
   set statusline+=\ \ %n\ \ \ \|
@@ -192,7 +157,70 @@ augroup END
 
 "}}}
 
-" Make Sure that Vim returns to the same line when we reopen a file{{{
+" shortmess{{{
+set shortmess+=A
+set shortmess+=I
+set shortmess+=c
+set shortmess+=s
+set shortmess+=a
+"}}}
+
+" list{{{
+set list
+set listchars=nbsp:⦸,tab:▸\ ,eol:¬,trail:·,precedes:«,extends:»
+"}}}
+
+" timeout and fast escape{{{
+set timeoutlen=420 ttimeoutlen=10
+autocmd CursorMoved * set timeoutlen=420 ttimeoutlen=10
+if ! has("gui_running")
+    augroup FastEscape
+        au!
+        au InsertEnter * set timeoutlen=0 ttimeoutlen=0
+        au InsertLeave * set timeoutlen=420 ttimeoutlen=10
+    augroup END
+endif
+"}}}
+
+" Search{{{
+" Highlight searches
+set hlsearch
+
+" Use smartcase
+set ignorecase
+set smartcase
+
+" Search while typing
+set incsearch
+
+let hlstate=0
+nnoremap <Leader>n :if (hlstate%2 == 0) \| nohlsearch \| else \| set hlsearch \| endif \| let hlstate=hlstate+1<CR>:echo "toggled visibility for hlsearch"<CR>
+inoremap <Leader>n <ESC>:if (hlstate%2 == 0) \|  nohlsearch \| else \| set hlsearch \| endif \| let hlstate=hlstate+1<CR>:echo "toggled visibility for hlsearch"<CR>a}}}
+
+" no and arrows {{{1
+
+" Get Rid of stupid Goddamned help keys
+inoremap <F1> <ESC>
+nnoremap <F1> <ESC>
+vnoremap <F1> <ESC>
+
+" Make arrows useless
+inoremap <Left> <Nop>
+inoremap <Right> <Nop>
+inoremap <Up> <Nop>
+inoremap <Down> <Nop>
+nnoremap <Left> <Nop>
+nnoremap <Right> <Nop>
+nnoremap <Up> <Nop>
+nnoremap <Down> <Nop>
+vnoremap <Left> <Nop>
+vnoremap <Right> <Nop>
+vnoremap <Up> <Nop>
+vnoremap <Down> <Nop>
+
+" }}}
+
+" return ot last line when reopen {{{
 augroup line_return
     au!
     au BufReadPost *
@@ -201,7 +229,7 @@ augroup line_return
         \ endif
 augroup END"}}}
 
-" ========== Functions ==================
+" =========== Functions ==================
 
 func! ClearTrailingWS()"{{{
   normal! mz
@@ -215,8 +243,12 @@ endfunc"}}}
 
 " =========== Vim Keybindings ==================
 
-" repeat last macro
-nnoremap <CR> @@
+" bindings{{{
+",w Command to show white space from a file.
+nnoremap <leader>w :call ShowTrailingWS()<CR>
+
+",W Command to remove white space from a file.
+nnoremap <leader>W :call ClearTrailingWS()<CR>
 
 " Toggle spell
 nnoremap <silent> <leader>s :set spell!<CR>
@@ -225,13 +257,60 @@ nnoremap <silent> <leader>s :set spell!<CR>
 vnoremap <tab> >gv
 vnoremap <s-tab> <gv
 
-" Ctrl+S to save{{{
-nnoremap <C-s> :w<CR>
-inoremap <C-s> <ESC>:w<CR>
-vnoremap <C-s> <ESC>:w<CR>"}}}
-
 " relative numbers key bindings."
 nmap <silent> <leader>l <ESC>:set relativenumber!<CR>
+
+" Map ; to : in normal and visual mode.
+nnoremap ; :
+vnoremap ; :
+
+" let left and right keys go to the next line
+set whichwrap+=<,>,h,l
+
+" ,v Select just pasted text.
+nnoremap <leader>v V`]
+
+" Search the word under the cursor with Ag/fzf
+nnoremap <leader>f mM:Ag <C-R><C-W><CR>
+vnoremap <leader>f mM"hy:Ag <C-R>h<CR>
+
+" Search the word under the cursor with Google
+nnoremap <leader>g mM:Gf "<C-R><C-W>"<CR>
+vnoremap <leader>g mM"hy:Gf <C-R>h<CR>
+
+" Mapping to Undotree
+nmap <leader>u <ESC>:UndotreeToggle<CR>
+
+" Mapping to NERDTree
+nnoremap <C-n> :NERDTreeToggle %<cr>
+
+" git
+nnoremap ge :GitGutterSignsToggle<CR>
+nnoremap gp :GitGutterPreviewHunk<CR>
+nnoremap gs :GitGutterStageHunk<CR>
+nnoremap gu :GitGutterUndoHunk<CR>
+nnoremap gr :GitGutterRevertHunk<CR>
+nnoremap gd :Gdiff<CR>
+nnoremap gc :Gcommit<CR>
+nnoremap [g :GitGutterPrevHunk<CR>
+nnoremap ]g :GitGutterNextHunk<CR>
+
+" ale
+nnoremap <silent> <BS> <Plug>(ale_previous_wrap)
+nnoremap <silent> <Space> <Plug>(ale_next_wrap)
+
+" fzf
+nnoremap <tab> :Files<CR>
+nnoremap <C-b> :Buffers<CR>
+nnoremap <S-Tab> << :FZFMru<CR>
+nnoremap <leader><tab> <plug>(fzf-maps-n)
+
+" Ctrl+S to save
+nnoremap <C-s> :w<CR>
+inoremap <C-s> <ESC>:w<CR>
+vnoremap <C-s> <ESC>:w<CR>
+
+"}}}
 
 " ========== Splits/Windows {{{1
 
@@ -257,10 +336,13 @@ nnoremap <silent> Ô :res -5<CR>
 nnoremap <silent> Ó :vertical resize -5<CR>
 nnoremap <silent> Ò :vertical resize +5<CR>
 
+set fillchars=vert:┃
+set splitbelow
 " }}}
 
 " ========== Buffers {{{1
 set hidden
+set switchbuf=usetab
 
 " <leader><leader> to toggle between buffers
 nmap <leader><leader> <C-^>
@@ -273,15 +355,17 @@ nnoremap <silent> <C-q> :Bdelete<CR>
 
 " }}}
 
-" Tabs
+" ========== Tabs {{{
 nnoremap ,to :tabnew %<CR>
 nnoremap ,tq :tabclose<CR>
 
 " Navigation in between tabs
 nnoremap [t :tabprevious<cr>
 nnoremap ]t :tabnext<cr>
+""}}}
 
-" Quickfix navigation
+" ========== Quickfix / Locallist / f<char> navigation{{{
+" Quicklist navigation
 nnoremap [q :cprev<CR>
 nnoremap ]q :cnext<CR>
 
@@ -289,32 +373,17 @@ nnoremap ]q :cnext<CR>
 nnoremap [a :lprev<CR>
 nnoremap ]a :lnext<CR>
 
-" Better navigation between results with f<char>
-nnoremap [f ,
-nnoremap ]f ;
-
 " Better navigation in jumplist
 nnoremap [w <C-o>
 nnoremap ]w <C-i>
 
-" Map ; to : in normal and visual mode.
-nnoremap ; :
-vnoremap ; :
+" Better navigation between results with f<char>
+nnoremap [f ,
+nnoremap ]f ;
 
-" let left and right keys go to the next line
-set whichwrap+=<,>,h,l
+"}}}
 
-",w Command to show white space from a file.
-nnoremap <leader>w :call ShowTrailingWS()<CR>
-
-",W Command to remove white space from a file.
-nnoremap <leader>W :call ClearTrailingWS()<CR>
-
-" ,v Select just pasted text.
-nnoremap <leader>v V`]
-
-
-" =========== Gvim Settings {{{1
+" ========== Gvim Settings {{{
 
 " Removing scrollbars
 if has("gui_running")
@@ -352,15 +421,10 @@ nnoremap <leader>ev <C-w><C-v><C-l>:e ~/.vimrc<cr>
 
 " ========== Plugins Settings =========="
 
-" Search the word under the cursor with Ag/fzf
-nnoremap <leader>f mM:Ag "<C-R><C-W>"<CR>
-vnoremap <leader>f mM"hy:Ag <C-R>h<CR>
-
-" Mapping to Undotree
-nmap <leader>u <ESC>:UndotreeToggle<CR>
-
-" Mapping to NERDTree
-nnoremap <C-n> :NERDTreeToggle %<cr>
+" misc {{{
+let g:vim_g_f_command = "Gf"
+let g:deoplete#enable_at_startup = 1
+" }}}
 
 " NerdTree params {{{1
 
@@ -368,16 +432,8 @@ let NERDTreeIgnore=['.sw?','\~$', '\.pyc$']
 let NERDTreeHijackNetrw=1
 
 "}}}
-
-nnoremap gs :GitGutterSignsToggle<CR>
-nnoremap gp :GitGutterPreviewHunk<CR>
-nnoremap gc :GitGutterStageHunk<CR>
-nnoremap gu :GitGutterUndoHunk<CR>
-nnoremap gr :GitGutterRevertHunk<CR>
-nnoremap [g :GitGutterPrevHunk<CR>
-nnoremap ]g :GitGutterNextHunk<CR>
-
-" ========== GitGutter Params {{{1
+"
+"  GitGutter Params {{{1
 
 let g:gitgutter_sign_added = '+'
 let g:gitgutter_sign_modified = '~'
@@ -387,10 +443,12 @@ let g:gitgutter_sign_modified_removed = '_'
 
 " }}}
 
-" GolderRatio settings
+" GolderRatio {{{
 let g:golden_ratio_exclude_nonmodifiable = 1
 let g:golden_ratio_autocommand = 0
+" }}}
 
+" ale fixers {{{
 let g:ale_fixers = {
 \   'javascript': ['eslint', 'importjs', 'prettier_eslint'],
 \   'php': ['phpcbf'],
@@ -398,14 +456,13 @@ let g:ale_fixers = {
 \}
 
 let g:ale_pattern_options = {
+\ '\.vue$': {'ale_linters': ['eslint'], 'ale_fixers': ['eslint']},
 \ '\.min\.js$': {'ale_linters': [], 'ale_fixers': []},
 \ '\.min\.css$': {'ale_linters': [], 'ale_fixers': []},
 \}
+" }}}
 
-nmap <silent> <BS> <Plug>(ale_previous_wrap)
-nmap <silent> <Space> <Plug>(ale_next_wrap)
-
-" ========== Ale sings and params {{{1
+" ale sings and params {{{1
 
 let g:ale_sign_column_always = 1
 let g:ale_sign_error = '⤫'
@@ -421,18 +478,45 @@ let g:ale_open_list = 1
 
 " }}}
 
-" Calendar
+" Calendar {{{
 let g:calendar_google_calendar = 1
 let g:calendar_google_task = 1
+"}}}
 
-" Mapping selecting mappings
-nmap <tab> :Files<CR>
-nmap <C-b> :Buffers<CR>
-nnoremap <S-Tab> << :FZFMru<CR>
-nmap <leader><tab> <plug>(fzf-maps-n)
+" fzf {{{
 let g:fzf_layout = { 'down': '~23%'  }
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  copen
+  cc
+endfunction
 
+let g:fzf_action = {
+  \ 'ctrl-b': function('s:build_quickfix_list'),
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+
+
+command! -bang -nargs=* Ag
+  \ call fzf#vim#ag(<q-args>,
+  \                 <bang>0 ? fzf#vim#with_preview('up:60%')
+  \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \                 <bang>0)
+
+"}}}
+
+" supertab {{{
 let g:SuperTabDefaultCompletionType = "<c-n>"
 let g:SuperTabContextDefaultCompletionType = "<c-n>"
+"}}}
+
+au FileType javascript setl sw=2 sts=2 et
+au FileType vue setl sw=2 sts=2 et
+au FileType html setl sw=2 sts=2 et
+autocmd FileType vue syntax sync fromstart
+
+autocmd WinLeave * set nocursorline
+autocmd WinEnter * set cursorline
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
