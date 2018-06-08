@@ -5,7 +5,6 @@ call ale#linter#Define('go', {
 \   'name': 'vet',
 \   'output_stream': 'stderr',
 \   'executable': 'go',
-\   'read_buffer': 1,
 \   'command': 'go vet -composites=false ./...',
 \   'callback': 'HandleVetError',
 \})

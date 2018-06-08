@@ -22,7 +22,7 @@ Plug 'majutsushi/tagbar'
 
 Plug 'scrooloose/nerdtree'
 "Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ryanoasis/vim-devicons'
+"Plug 'ryanoasis/vim-devicons'
 
 Plug 'mbbill/undotree'
 Plug 'roman/golden-ratio'
@@ -140,7 +140,7 @@ set noshelltemp
 if has("statusline")
   set statusline=
   set statusline+=\ \ %n\ \ \ \|
-  set statusline+=\ \ %{WebDevIconsGetFileTypeSymbol()}
+  "set statusline+=\ \ %{WebDevIconsGetFileTypeSymbol()}
   set statusline+=\ %f
   set statusline+=\ %=
   set statusline+=\ %h%m%r%k
@@ -149,7 +149,7 @@ if has("statusline")
 
   set statusline+=\ %-8.(%l,%c%V%)
   set statusline+=\ %P\ %L\ 
-  set statusline+=\|\ \ %{WebDevIconsGetFileFormatSymbol()}\ 
+  "set statusline+=\|\ \ %{WebDevIconsGetFileFormatSymbol()}\ 
 endif
 
 " Change status color on different modes
