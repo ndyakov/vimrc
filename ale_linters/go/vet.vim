@@ -5,9 +5,13 @@ call ale#linter#Define('go', {
 \   'name': 'vet',
 \   'output_stream': 'stderr',
 \   'executable': 'go',
-\   'command': 'go vet -composites=false ./...',
+\   'command_callback': 'GoVetCommand',
 \   'callback': 'HandleVetError',
 \})
+
+function! GoVetCommand(buffer) abort
+    return 'go vet '.go#package#ImportPath()
+endfunction
 
 function! s:goVetFormatHandler(buffer, lines, type) abort
     let l:pattern = '\v^([^:]+):(\d+):?(\d+)?:? ?(.+)$'
