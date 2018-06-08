@@ -14,14 +14,14 @@ Plug 'google/vim-searchindex'
 Plug 'szw/vim-g'
 
 Plug 'tpope/vim-surround'
-Plug 'chaoren/vim-wordmotion'
 Plug 'moll/vim-bbye'
 "Plug 'Townk/vim-autoclose'
-Plug 'Raimondi/delimitMate'
+"Plug 'Raimondi/delimitMate'
 Plug 'chrisbra/NrrwRgn'
+Plug 'majutsushi/tagbar'
 
 Plug 'scrooloose/nerdtree'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+"Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ryanoasis/vim-devicons'
 
 Plug 'mbbill/undotree'
@@ -34,20 +34,29 @@ Plug 'pbogut/fzf-mru.vim'
 
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'airblade/vim-rooter'
 
 Plug 'w0rp/ale'
 if has('nvim')
+  Plug 'HerringtonDarkholme/yats.vim'
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  Plug 'mhartington/deoplete-typescript', { 'do': 'npm install -g typescript'}
+  Plug 'mhartington/nvim-typescript'
+
+  let g:deoplete#enable_at_startup = 1
+
 else
   Plug 'Shougo/deoplete.nvim'
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 
-Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-Plug 'padawan-php/deoplete-padawan', { 'do': 'composer install' }
+Plug 'jwalton512/vim-blade'
+Plug 'zchee/deoplete-go', { 'do': 'make', 'for': 'go'}
+"Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+Plug 'arnaud-lb/vim-php-namespace'
 
+"Plug 'padawan-php/deoplete-padawan', { 'do': 'composer install', 'for': 'php' }
 
 Plug 'tpope/vim-markdown'
 Plug 'ekalinin/Dockerfile.vim'
@@ -75,8 +84,6 @@ filetype plugin indent on
 colorscheme lucius
 LuciusDark
 highlight Comment ctermfg=249 guifg=#b2b2b2
-highlight Error ctermfg=200 guifg=#ff0000
-set termguicolors
 "highlight Normal ctermbg=NONE
 
 "}}}
@@ -271,15 +278,15 @@ set whichwrap+=<,>,h,l
 nnoremap <leader>v V`]
 
 " Search the word under the cursor with Ag/fzf
-nnoremap <leader>f mM:Ag <C-R><C-W><CR>
-vnoremap <leader>f mM"hy:Ag <C-R>h<CR>
+nnoremap <leader>f mM:Ag! <C-R><C-W><CR>
+vnoremap <leader>f mM"hy:Ag! <C-R>h<CR>
 
 " Search the word under the cursor with Google
-nnoremap <leader>g mM:Gf "<C-R><C-W>"<CR>
-vnoremap <leader>g mM"hy:Gf <C-R>h<CR>
+nnoremap <leader>go mM:Gf "<C-R><C-W>"<CR>
+vnoremap <leader>go mM"hy:Gf <C-R>h<CR>
 
 " Mapping to Undotree
-nmap <leader>u <ESC>:UndotreeToggle<CR>
+nmap <C-u> <ESC>:UndotreeToggle<CR>
 
 " Mapping to NERDTree
 nnoremap <C-n> :NERDTreeToggle %<cr>
@@ -302,8 +309,10 @@ nnoremap <silent> <Space> <Plug>(ale_next_wrap)
 " fzf
 nnoremap <tab> :Files<CR>
 nnoremap <C-b> :Buffers<CR>
-nnoremap <S-Tab> << :FZFMru<CR>
+nnoremap <Space> :BTags<CR>
+nnoremap <s-Tab> :FZFMru<CR>
 nnoremap <leader><tab> <plug>(fzf-maps-n)
+nnoremap \ :TagbarToggle<CR>
 
 " Ctrl+S to save
 nnoremap <C-s> :w<CR>
@@ -390,7 +399,7 @@ if has("gui_running")
     if has('win32')
         set guifont=Consolas:h12   " Win32.
     elseif has('gui_macvim')
-        set guifont=Monaco:h12     " OSX.
+        set guifont=LiterationMonoPowerline\ Nerd\ Font:h14     " OSX.
     else
         set guifont=Liberation\ Mono\ 12 " linux
     endif
@@ -448,11 +457,36 @@ let g:golden_ratio_exclude_nonmodifiable = 1
 let g:golden_ratio_autocommand = 0
 " }}}
 
+
+
+" Go stuff
+nnoremap <leader>gd :GoDef <CR>
+
+
+"nerd tree find
+nnoremap <leader>nf :NERDTreeFind <CR>
+
+function! PhpSyntaxOverride()
+  " Put snippet overrides in this function.
+  hi! link phpDocTags phpDefine
+  hi! link phpDocParam phpType
+endfunction
+
+augroup phpSyntaxOverride
+  autocmd!
+  autocmd FileType php call PhpSyntaxOverride()
+augroup END
+
+
 " ale fixers {{{
 let g:ale_fixers = {
 \   'javascript': ['eslint', 'importjs', 'prettier_eslint'],
 \   'php': ['phpcbf'],
 \   'go' : ['goimports', 'gofmt'],
+\}
+
+let g:ale_linters = {
+\   'go' : ['revive', 'vet'],
 \}
 
 let g:ale_pattern_options = {
@@ -484,6 +518,8 @@ let g:calendar_google_task = 1
 "}}}
 
 " fzf {{{
+let g:fzf_mru_relative = 1
+let g:fzf_tags_command = "ctags -R --exclude=@.ignore --exclude=@.ctagsadditionalignore "
 let g:fzf_layout = { 'down': '~23%'  }
 function! s:build_quickfix_list(lines)
   call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
@@ -507,16 +543,28 @@ command! -bang -nargs=* Ag
 "}}}
 
 " supertab {{{
-let g:SuperTabDefaultCompletionType = "<c-n>"
-let g:SuperTabContextDefaultCompletionType = "<c-n>"
+"let g:SuperTabDefaultCompletionType = "<c-n>"
+"let g:SuperTabContextDefaultCompletionType = "<c-n>"
 "}}}
 
 au FileType javascript setl sw=2 sts=2 et
 au FileType vue setl sw=2 sts=2 et
+au FileType typescript setl sw=2 sts=2 et
+au FileType typescriptreact setl sw=2 sts=2 et
 au FileType html setl sw=2 sts=2 et
 autocmd FileType vue syntax sync fromstart
 
 autocmd WinLeave * set nocursorline
 autocmd WinEnter * set cursorline
 
-" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
+function! IPhpInsertUse()
+    call PhpInsertUse()
+    call feedkeys('a',  'n')
+endfunction
+
+autocmd FileType php inoremap <Leader>u <Esc>:call IPhpInsertUse()<CR>
+autocmd FileType php noremap <Leader>u :call PhpInsertUse()<CR>
+
+let g:rooter_patterns = ['composer.json', '.git/']
+
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=1:fdc=1:ts=2:sw=2:sts=2
